@@ -1,10 +1,8 @@
-#include <AccelStepper.h>
-#define MotorInterfaceType 4
-
 #include <SPI.h>
-#include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <ThreeWire.h>  
+#include <RtcDS1302.h>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64 
@@ -15,23 +13,27 @@
 #define OLED_CS    12
 #define OLED_RESET 13
 
-#include <ThreeWire.h>  
-#include <RtcDS1302.h>
-
-ThreeWire myWire(4,2, A5); // IO, SCLK, CE
-RtcDS1302<ThreeWire> Rtc(myWire);
-
-#define PIN_FAN 10
-
-#define PIN_BUTTON 7
-
-int button_pressed = 0;
-
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
+#define RTC_IO 4
+#define RTC_CLOCK 2
 
 #define PIN_RED 3
 #define PIN_GREEN 5
 #define PIN_BLUE 6
+
+#define PIN_DOOR 10
+
+#define PIN_BUTTON 7
+
+
+// Display
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
+
+// RTC
+ThreeWire myWire(RTC_IO,RTC_CLOCK, A5); // IO, SCLK, CE
+RtcDS1302<ThreeWire> Rtc(myWire);
+
+int button_pressed = 0;
+
 int counter = 0;
 int total_counter = 0;
 int numColors = 255;
@@ -53,8 +55,8 @@ void setup() {
   pinMode(PIN_BLUE, OUTPUT);
   pinMode(PIN_GREEN, OUTPUT);
   pinMode(PIN_BUTTON, INPUT);
-  pinMode(PIN_FAN, OUTPUT);
-  analogWrite(PIN_FAN, 255);
+  pinMode(PIN_DOOR, OUTPUT);
+  analogWrite(PIN_DOOR, 255);
 
   display.begin(SSD1306_SWITCHCAPVCC);
   display.clearDisplay();
@@ -87,7 +89,7 @@ void loop() {
 
     if (total_counter >= numColors)
     {
-      analogWrite(PIN_FAN, 255);
+      analogWrite(PIN_DOOR, 255);
       button_pressed = 0;
     }
 
@@ -110,7 +112,7 @@ void loop() {
       button_pressed = 1;
       total_counter = 0;
       counter = 0;
-      analogWrite(PIN_FAN, 0);
+      analogWrite(PIN_DOOR, 0);
     }
 
     display.clearDisplay();
